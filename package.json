@@ -1,0 +1,25 @@
+{
+  "name": "anti-potato-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+	"start": "ts-node src/index.ts",
+	"dev": "nodemon --exec ts-node src/index.ts",
+	"lint": "npx eslint . --ext .ts",
+	"fixlint": "npx eslint . --ext .ts --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.10",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0"
+  }
+}
