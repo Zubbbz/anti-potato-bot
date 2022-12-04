@@ -1,12 +1,16 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import * as dotenv from 'dotenv';
 import * as fs from 'fs';
+import * as path from 'path';
+import log from './logging';
 
-dotenv.config();
+const CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, '../config.json'), 'utf-8'));
 
-const regex = RegExp(process.env.REGEXP!);
-const naughyThreshhold: number = parseInt(process.env.NAUGHTY_THRESHHOLD!);
-const timeoutLengthSeconds: number = parseInt(process.env.TIMEOUT_LENGTH_SECONDS!);
+const TOKEN = CONFIG.TOKEN;
+const TARGET = CONFIG.TARGET_ID;
+const REGEX = RegExp(CONFIG.REGEXP);
+const naughyThreshhold: number = parseInt(CONFIG.NAUGHTY_THRESHHOLD);
+const timeoutLengthSeconds: number = parseInt(CONFIG.TIMEOUT_LENGTH_SECONDS);
+
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -29,14 +33,14 @@ client.on('messageCreate', (message) => {
 	const author = message.author;
 	const content = message.content;
 
-	if (message.author.id == process.env.TARGET_ID && content.toLowerCase().match(regex)) {
-
-		naughtyCounter++;
+	if (message.author.id == TARGET && content.toLowerCase().match(REGEX)) {
 
 		message.delete()
 			.then(msg => log(`Deleted message from ${msg.author.username} | Content: ${content}\n`))
 			.catch(err => log('MSGDELETE: ' + err + '\n'));
 
+		// timeout the target after they surpass the configurable number of infractions
+		naughtyCounter++;
 		if (naughtyCounter >= naughyThreshhold) {
 			naughtyCounter = 0;
 			message.guild!.members.fetch(author.id)
@@ -53,21 +57,7 @@ client.on('messageCreate', (message) => {
 	}
 });
 
-function log(content: string):void {
-	let status: string;
-	if (content.toLowerCase().match(/error/)) {
-		status = 'ERROR';
-	} else {
-		status = 'INFO ';
-	}
-	try {
-		fs.appendFileSync(
-			'./log/' + new Date().toLocaleDateString().replace(/\//g, '-') + '.txt',
-			'| ' + Date.now() + ' | ' + status + ' | ' + content
-		);
-	} catch {
-		fs.mkdirSync('./log');
-	}
-}
 
-client.login(process.env.TOKEN);
+
+client.login(TOKEN)
+	.catch(err => log('LOGIN ' + err));
