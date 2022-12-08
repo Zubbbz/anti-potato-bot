@@ -6,7 +6,7 @@ import log from './logging';
 const CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, '../config.json'), 'utf-8'));
 
 const TOKEN = CONFIG.TOKEN;
-const TARGET = CONFIG.TARGET_ID;
+const TARGETS = CONFIG.TARGETS;
 const REGEX = RegExp(CONFIG.REGEXP);
 const naughyThreshhold: number = parseInt(CONFIG.NAUGHTY_THRESHHOLD);
 const timeoutLengthSeconds: number = parseInt(CONFIG.TIMEOUT_LENGTH_SECONDS);
@@ -33,7 +33,7 @@ client.on('messageCreate', (message) => {
 	const author = message.author;
 	const content = message.content;
 
-	if (message.author.id == TARGET && content.toLowerCase().match(REGEX)) {
+	if (content.toLowerCase().match(REGEX) && TARGETS.includes(parseInt(author.id))) {
 
 		message.delete()
 			.then(msg => log(`Deleted message from ${msg.author.username} | Content: ${content}\n`))
@@ -56,8 +56,6 @@ client.on('messageCreate', (message) => {
 		}
 	}
 });
-
-
 
 client.login(TOKEN)
 	.catch(err => log('LOGIN ' + err));
